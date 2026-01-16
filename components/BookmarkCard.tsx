@@ -3,11 +3,28 @@ import { type Bookmark } from "@/lib/types";
 interface BookmarkCardProps {
   bookmark: Bookmark;
   onDelete: (id: string) => void;
+  isFocused?: boolean;
+  tabIndex?: number;
+  dataBookmarkCard?: string;
 }
 
-export function BookmarkCard({ bookmark, onDelete }: BookmarkCardProps) {
+export function BookmarkCard({
+  bookmark,
+  onDelete,
+  isFocused = false,
+  tabIndex,
+  dataBookmarkCard,
+}: BookmarkCardProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className={`bg-white rounded-lg border p-4 shadow-sm transition-all ${
+        isFocused
+          ? "border-blue-500 ring-2 ring-blue-500"
+          : "border-gray-200 hover:shadow-md"
+      }`}
+      tabIndex={tabIndex}
+      data-bookmark-card={dataBookmarkCard}
+    >
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-gray-900 line-clamp-1">{bookmark.title}</h3>
         <button
