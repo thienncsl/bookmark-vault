@@ -50,24 +50,18 @@ export function deleteBookmark(id: string): void {
   }
 }
 
-export function searchBookmarks(query: string): Bookmark[] {
-  if (typeof window === "undefined") return [];
+export function searchBookmarks(query: string, bookmarks?: Bookmark[]): Bookmark[] {
+  const bookmarksToSearch = bookmarks || getBookmarks();
   const trimmedQuery = query.trim();
-  if (!trimmedQuery) return getBookmarks();
+  if (!trimmedQuery) return bookmarksToSearch;
 
   const lowerQuery = trimmedQuery.toLowerCase();
 
-  try {
-    const bookmarks = getBookmarks();
-    return bookmarks.filter(
-      (b) =>
-        b.title.toLowerCase().includes(lowerQuery) ||
-        b.url.toLowerCase().includes(lowerQuery) ||
-        b.description?.toLowerCase().includes(lowerQuery) ||
-        b.tags.some((t) => t.toLowerCase().includes(lowerQuery))
-    );
-  } catch {
-    console.error("Failed to search bookmarks");
-    return [];
-  }
+  return bookmarksToSearch.filter(
+    (b) =>
+      b.title.toLowerCase().includes(lowerQuery) ||
+      b.url.toLowerCase().includes(lowerQuery) ||
+      b.description?.toLowerCase().includes(lowerQuery) ||
+      b.tags.some((t) => t.toLowerCase().includes(lowerQuery))
+  );
 }

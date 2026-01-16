@@ -6,6 +6,8 @@ interface BookmarkCardProps {
   isFocused?: boolean;
   tabIndex?: number;
   dataBookmarkCard?: string;
+  isPendingAdd?: boolean;
+  isPendingDelete?: boolean;
 }
 
 export function BookmarkCard({
@@ -14,26 +16,54 @@ export function BookmarkCard({
   isFocused = false,
   tabIndex,
   dataBookmarkCard,
+  isPendingAdd = false,
+  isPendingDelete = false,
 }: BookmarkCardProps) {
+  const isPending = isPendingAdd || isPendingDelete;
+
   return (
     <div
-      className={`bg-white rounded-lg border p-4 shadow-sm transition-all ${
+      className={`bg-white rounded-lg border p-4 shadow-sm transition-all relative ${
         isFocused
           ? "border-blue-500 ring-2 ring-blue-500"
           : "border-gray-200 hover:shadow-md"
-      }`}
+      } ${isPending ? "opacity-50" : ""}`}
       tabIndex={tabIndex}
       data-bookmark-card={dataBookmarkCard}
     >
+      {isPendingAdd && (
+        <div className="absolute top-2 right-2">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+            Saving...
+          </span>
+        </div>
+      )}
+
+      {isPendingDelete && (
+        <div className="absolute top-2 right-2">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+            Deleting...
+          </span>
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-gray-900 line-clamp-1">{bookmark.title}</h3>
         <button
           onClick={() => onDelete(bookmark.id)}
-          className="text-gray-400 hover:text-red-600 transition-colors"
+          disabled={isPending}
+          className={`text-gray-400 transition-colors ${
+            isPending ? "opacity-30 cursor-not-allowed" : "hover:text-red-600"
+          }`}
           title="Delete bookmark"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
           </svg>
         </button>
       </div>

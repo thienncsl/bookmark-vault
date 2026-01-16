@@ -6,8 +6,16 @@ import { BookmarkCard } from "@/components/BookmarkCard";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export function BookmarkList() {
-  const { filteredBookmarks, loading, searchTerm, setSearchTerm, deleteBookmark } =
-    useBookmarksContext();
+  const {
+    filteredBookmarks,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    deleteBookmark,
+    pendingAdds,
+    pendingDeletes,
+    error,
+  } = useBookmarksContext();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
@@ -44,20 +52,17 @@ export function BookmarkList() {
     );
   }
 
-  if (filteredBookmarks.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">
-          {searchTerm
-            ? "No bookmarks match your search."
-            : "No bookmarks yet. Add your first one above!"}
-        </p>
-      </div>
-    );
-  }
+  const showEmptyState = filteredBookmarks.length === 0 && !searchTerm;
+  const showNoResultsMessage = filteredBookmarks.length === 0 && searchTerm;
 
   return (
     <div>
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
       <div className="mb-6">
         <input
           type="text"
@@ -69,18 +74,34 @@ export function BookmarkList() {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredBookmarks.map((bookmark, index) => (
-          <BookmarkCard
-            key={bookmark.id}
-            bookmark={bookmark}
-            onDelete={deleteBookmark}
-            isFocused={index === focusedIndex}
-            tabIndex={0}
-            dataBookmarkCard=""
-          />
-        ))}
-      </div>
+      {showEmptyState && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No bookmarks yet. Add your first one above!</p>
+        </div>
+      )}
+
+      {showNoResultsMessage && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No bookmarks match your search.</p>
+        </div>
+      )}
+
+      {filteredBookmarks.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredBookmarks.map((bookmark, index) => (
+            <BookmarkCard
+              key={bookmark.id}
+              bookmark={bookmark}
+              onDelete={deleteBookmark}
+              isFocused={index === focusedIndex}
+              tabIndex={0}
+              dataBookmarkCard=""
+              isPendingAdd={pendingAdds.has(bookmark.id)}
+              isPendingDelete={pendingDeletes.has(bookmark.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
