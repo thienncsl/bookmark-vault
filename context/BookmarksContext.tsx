@@ -30,8 +30,11 @@ interface BookmarksContextType {
 const BookmarksContext = createContext<BookmarksContextType | null>(null);
 
 export function BookmarksProvider({ children }: { children: ReactNode }) {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>(() => {
+    if (typeof window === "undefined") return [];
+    return getBookmarks();
+  });
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -47,10 +50,14 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     setBookmarks(getBookmarks());
   }, []);
 
+  // Initialize loading state - this effect runs once on mount
   useEffect(() => {
-    refreshBookmarks();
-    setLoading(false);
-  }, [refreshBookmarks]);
+    if (typeof window !== "undefined") {
+      setLoading(true);
+      setBookmarks(getBookmarks());
+      setLoading(false);
+    }
+  }, []);
 
   const filteredBookmarks = debouncedSearch.trim()
     ? storageSearchBookmarks(debouncedSearch)

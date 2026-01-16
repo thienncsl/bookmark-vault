@@ -52,9 +52,10 @@ export function deleteBookmark(id: string): void {
 
 export function searchBookmarks(query: string): Bookmark[] {
   if (typeof window === "undefined") return [];
-  if (!query.trim()) return getBookmarks();
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) return getBookmarks();
 
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = trimmedQuery.toLowerCase();
 
   try {
     const bookmarks = getBookmarks();
