@@ -1,9 +1,11 @@
 // Mock localStorage
+type JestMock<T> = jest.Mock<T>;
+
 interface LocalStorageMock {
-  getItem: jest.Mock<string | null, [string]>;
-  setItem: jest.Mock<void, [string, string]>;
-  removeItem: jest.Mock<void, [string]>;
-  clear: jest.Mock<void, []>;
+  getItem: JestMock<(key: string) => string | null>;
+  setItem: JestMock<(key: string, value: string) => void>;
+  removeItem: JestMock<(key: string) => void>;
+  clear: JestMock<() => void>;
 }
 
 const localStorageMock: LocalStorageMock = {
@@ -17,3 +19,6 @@ Object.defineProperty(global, "localStorage", {
   value: localStorageMock,
   writable: true,
 });
+
+// Add jest-dom matchers
+import "@testing-library/jest-dom";
