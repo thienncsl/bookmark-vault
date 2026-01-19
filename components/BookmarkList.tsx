@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useBookmarksContext } from "@/hooks/useBookmarks";
 import { BookmarkCard } from "@/components/BookmarkCard";
 import { BookmarkToolbar } from "@/components/BookmarkToolbar";
@@ -20,11 +20,27 @@ export function BookmarkList() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
+  // Dev-only: render counter for BookmarkList
+  const renderCounter = useRef(0);
+  if (process.env.NODE_ENV === "development") {
+    renderCounter.current++;
+    console.log(`[BookmarkList] Render #${renderCounter.current}`);
+  }
+
   const blurActiveElement = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
   }, []);
+
+  // Memoize delete handler to provide stable reference to BookmarkCard
+  // Without this, each render creates a new function, breaking React.memo
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteBookmark(id);
+    },
+    [deleteBookmark]
+  );
 
   useEffect(() => {
     if (focusedIndex >= 0 && focusedIndex < filteredBookmarks.length) {
@@ -95,7 +111,7 @@ export function BookmarkList() {
             <BookmarkCard
               key={bookmark.id}
               bookmark={bookmark}
-              onDelete={deleteBookmark}
+              onDelete={handleDelete}
               isFocused={index === focusedIndex}
               tabIndex={0}
               dataBookmarkCard=""

@@ -1,3 +1,4 @@
+import { memo, useMemo, useRef } from "react";
 import { type Bookmark } from "@/lib/types";
 
 interface BookmarkCardProps {
@@ -10,7 +11,9 @@ interface BookmarkCardProps {
   isPendingDelete?: boolean;
 }
 
-export function BookmarkCard({
+// Memoized BookmarkCard - only re-renders when props actually change
+// This prevents unnecessary re-renders when parent (BookmarkList) re-renders
+export const BookmarkCard = memo(function BookmarkCard({
   bookmark,
   onDelete,
   isFocused = false,
@@ -19,10 +22,30 @@ export function BookmarkCard({
   isPendingAdd = false,
   isPendingDelete = false,
 }: BookmarkCardProps) {
-  const isPending = isPendingAdd || isPendingDelete;
+  // Dev-only: per-card render counter using ref
+  const renderCounter = useRef(0);
+  if (process.env.NODE_ENV === "development") {
+    renderCounter.current++;
+    console.log(
+      `[BookmarkCard] "${bookmark.title}" - Render #${renderCounter.current}`
+    );
+  }
+
+  // Memoize derived state to avoid recalculation on each render
+  const isPending = useMemo(
+    () => isPendingAdd || isPendingDelete,
+    [isPendingAdd, isPendingDelete]
+  );
+
+  // Memoize delete handler to return stable reference
+  const handleDelete = useMemo(
+    () => () => onDelete(bookmark.id),
+    [onDelete, bookmark.id]
+  );
 
   return (
     <div
+      data-testid="bookmark-card"
       className={`bg-white rounded-lg border p-4 shadow-sm transition-all relative ${
         isFocused
           ? "border-blue-500 ring-2 ring-blue-500"
@@ -50,7 +73,7 @@ export function BookmarkCard({
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-gray-900 line-clamp-1">{bookmark.title}</h3>
         <button
-          onClick={() => onDelete(bookmark.id)}
+          onClick={handleDelete}
           disabled={isPending}
           className={`text-gray-400 transition-colors ${
             isPending ? "opacity-30 cursor-not-allowed" : "hover:text-red-600"
@@ -95,4 +118,4 @@ export function BookmarkCard({
       )}
     </div>
   );
-}
+});

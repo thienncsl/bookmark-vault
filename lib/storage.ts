@@ -43,7 +43,7 @@ export function deleteBookmark(id: string): void {
 
   try {
     const bookmarks = getBookmarks();
-    const filtered = bookmarks.filter((b) => b.id !== id);
+    const filtered = bookmarks.filter(b => b.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   } catch {
     console.error("Failed to delete bookmark from localStorage");
