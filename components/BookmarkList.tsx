@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useBookmarksContext } from "@/hooks/useBookmarks";
 import { BookmarkCard } from "@/components/BookmarkCard";
+import { BookmarkToolbar } from "@/components/BookmarkToolbar";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export function BookmarkList() {
@@ -62,6 +63,8 @@ export function BookmarkList() {
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
+
+      <BookmarkToolbar />
 
       <div className="mb-6">
         <input
