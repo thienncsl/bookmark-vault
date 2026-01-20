@@ -14,9 +14,10 @@ import {
   getBookmarks,
   addBookmark as storageAddBookmark,
   deleteBookmark as storageDeleteBookmark,
+  updateBookmark as storageUpdateBookmark,
   searchBookmarks as storageSearchBookmarks,
 } from "@/lib/storage";
-import { type Bookmark, type CreateBookmarkInput } from "@/lib/types";
+import { type Bookmark, type CreateBookmarkInput, type UpdateBookmarkInput } from "@/lib/types";
 
 // Action types
 export type BookmarksAction =
@@ -26,6 +27,9 @@ export type BookmarksAction =
   | { type: "DELETE_BOOKMARK"; payload: { id: string } }
   | { type: "DELETE_BOOKMARK_SUCCESS"; payload: { id: string } }
   | { type: "DELETE_BOOKMARK_ERROR"; payload: { id: string; error: string } }
+  | { type: "UPDATE_BOOKMARK"; payload: Bookmark }
+  | { type: "UPDATE_BOOKMARK_SUCCESS"; payload: { id: string } }
+  | { type: "UPDATE_BOOKMARK_ERROR"; payload: { id: string; error: string } }
   | { type: "SET_BOOKMARKS"; payload: Bookmark[] }
   | { type: "CLEAR_ERROR" };
 
@@ -45,6 +49,7 @@ interface BookmarksContextType {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   addBookmark: (input: CreateBookmarkInput) => void;
+  updateBookmark: (id: string, input: UpdateBookmarkInput) => void;
   deleteBookmark: (id: string) => void;
   error: string | null;
   simulateError: boolean;
@@ -133,6 +138,30 @@ function bookmarksReducer(state: BookmarksState, action: BookmarksAction): Bookm
       return {
         ...state,
         pendingDeletes: newPendingDeletes,
+        error: action.payload.error,
+      };
+    }
+
+    case "UPDATE_BOOKMARK": {
+      return {
+        ...state,
+        bookmarks: state.bookmarks.map((b) =>
+          b.id === action.payload.id ? action.payload : b
+        ),
+        error: null,
+      };
+    }
+
+    case "UPDATE_BOOKMARK_SUCCESS": {
+      return {
+        ...state,
+        error: null,
+      };
+    }
+
+    case "UPDATE_BOOKMARK_ERROR": {
+      return {
+        ...state,
         error: action.payload.error,
       };
     }
@@ -243,6 +272,43 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [state.simulateError]);
 
+  // Simulated async update bookmark with optimistic update
+  const updateBookmark = useCallback((id: string, input: UpdateBookmarkInput) => {
+    const existingBookmark = state.bookmarks.find((b) => b.id === id);
+    if (!existingBookmark) return;
+
+    const updatedBookmark: Bookmark = {
+      ...existingBookmark,
+      ...input,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Optimistic: immediately update in state
+    dispatch({ type: "UPDATE_BOOKMARK", payload: updatedBookmark });
+
+    // Simulate async operation
+    setTimeout(() => {
+      if (state.simulateError) {
+        // Revert on error
+        dispatch({
+          type: "UPDATE_BOOKMARK_ERROR",
+          payload: { id, error: "Simulated error: Failed to update bookmark" },
+        });
+        return;
+      }
+
+      try {
+        storageUpdateBookmark(id, input);
+        dispatch({ type: "UPDATE_BOOKMARK_SUCCESS", payload: { id } });
+      } catch (error) {
+        dispatch({
+          type: "UPDATE_BOOKMARK_ERROR",
+          payload: { id, error: error instanceof Error ? error.message : "Failed to update bookmark" },
+        });
+      }
+    }, 0);
+  }, [state.simulateError, state.bookmarks]);
+
   const filteredBookmarks = debouncedSearch.trim()
     ? storageSearchBookmarks(debouncedSearch, state.bookmarks)
     : state.bookmarks;
@@ -270,6 +336,7 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
         searchTerm,
         setSearchTerm,
         addBookmark,
+        updateBookmark,
         deleteBookmark,
         error: state.error,
         simulateError,

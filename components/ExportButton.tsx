@@ -36,10 +36,10 @@ export function ExportButton({
   return (
     <button
       onClick={handleExport}
-      className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${className}`}
+      className={`inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-blue-500 transition-colors ${className}`}
     >
       <svg
-        className="w-4 h-4 mr-2"
+        className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

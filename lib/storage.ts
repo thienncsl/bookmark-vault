@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { type Bookmark, type CreateBookmarkInput } from "./types";
+import { type Bookmark, type CreateBookmarkInput, type UpdateBookmarkInput } from "./types";
 import { bookmarkSchema } from "./validation";
 
 const STORAGE_KEY = "bookmark-vault-data";
@@ -47,6 +47,25 @@ export function deleteBookmark(id: string): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   } catch {
     console.error("Failed to delete bookmark from localStorage");
+  }
+}
+
+export function updateBookmark(id: string, input: UpdateBookmarkInput): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    const bookmarks = getBookmarks();
+    const index = bookmarks.findIndex(b => b.id === id);
+    if (index === -1) return;
+
+    bookmarks[index] = {
+      ...bookmarks[index],
+      ...input,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+  } catch {
+    console.error("Failed to update bookmark in localStorage");
   }
 }
 

@@ -5,6 +5,8 @@ export interface Bookmark {
   description?: string;
   tags: string[];
   createdAt: string;
+  updatedAt?: string;
 }
 
-export type CreateBookmarkInput = Omit<Bookmark, "id" | "createdAt">;
+export type CreateBookmarkInput = Omit<Bookmark, "id" | "createdAt" | "updatedAt">;
+export type UpdateBookmarkInput = Partial<Omit<Bookmark, "id" | "createdAt">>;

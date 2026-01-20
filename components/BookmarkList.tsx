@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useBookmarksContext } from "@/hooks/useBookmarks";
 import { BookmarkCard } from "@/components/BookmarkCard";
 import { BookmarkToolbar } from "@/components/BookmarkToolbar";
+import { AddBookmarkForm } from "@/components/AddBookmarkForm";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export function BookmarkList() {
@@ -19,13 +20,16 @@ export function BookmarkList() {
   } = useBookmarksContext();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [showAddForm, setShowAddForm] = useState(false);
 
-  // Dev-only: render counter for BookmarkList
+  // Dev-only: render counter (useEffect to avoid ref access during render)
   const renderCounter = useRef(0);
-  if (process.env.NODE_ENV === "development") {
-    renderCounter.current++;
-    console.log(`[BookmarkList] Render #${renderCounter.current}`);
-  }
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      renderCounter.current++;
+      console.log(`[BookmarkList] Render #${renderCounter.current}`);
+    }
+  });
 
   const blurActiveElement = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {
@@ -64,7 +68,7 @@ export function BookmarkList() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Loading bookmarks...</p>
+        <p className="text-gray-500 dark:text-gray-400">Loading bookmarks...</p>
       </div>
     );
   }
@@ -75,12 +79,26 @@ export function BookmarkList() {
   return (
     <div>
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-700 text-sm">{error}</p>
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
         </div>
       )}
 
-      <BookmarkToolbar />
+      <BookmarkToolbar
+        showAddForm={showAddForm}
+        onToggleAddForm={() => setShowAddForm(!showAddForm)}
+      />
+
+      {showAddForm && (
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-4">
+            Add New Bookmark
+          </h3>
+          <AddBookmarkForm
+            onBookmarkAdded={() => setShowAddForm(false)}
+          />
+        </div>
+      )}
 
       <div className="mb-6">
         <input
@@ -89,19 +107,23 @@ export function BookmarkList() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search bookmarks..."
-          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm"
+          className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 shadow-sm focus:border-blue-500 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-500 sm:text-sm transition-colors"
         />
       </div>
 
       {showEmptyState && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No bookmarks yet. Add your first one above!</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            No bookmarks yet. Add your first one above!
+          </p>
         </div>
       )}
 
       {showNoResultsMessage && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No bookmarks match your search.</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            No bookmarks match your search.
+          </p>
         </div>
       )}
 

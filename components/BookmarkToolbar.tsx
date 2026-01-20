@@ -7,10 +7,16 @@ import { ImportButton } from "@/components/ImportButton";
 import { type Bookmark } from "@/lib/types";
 
 interface BookmarkToolbarProps {
+  showAddForm: boolean;
+  onToggleAddForm: () => void;
   className?: string;
 }
 
-export function BookmarkToolbar({ className = "" }: BookmarkToolbarProps) {
+export function BookmarkToolbar({
+  showAddForm,
+  onToggleAddForm,
+  className = "",
+}: BookmarkToolbarProps) {
   const { bookmarks, refreshBookmarks } = useBookmarksContext();
 
   const handleImport = useCallback(
@@ -38,8 +44,32 @@ export function BookmarkToolbar({ className = "" }: BookmarkToolbarProps) {
       role="toolbar"
       aria-label="Bookmark management toolbar"
     >
-      <ExportButton bookmarks={bookmarks} />
-      <ImportButton onImport={handleImport} existingUrls={bookmarks.map((b) => b.url)} />
+      <button
+        onClick={onToggleAddForm}
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-blue-500 transition-colors shadow-sm"
+      >
+        <svg
+          className="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={showAddForm ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"}
+          />
+        </svg>
+        {showAddForm ? "Cancel" : "Add bookmark"}
+      </button>
+      <div className="flex items-center gap-3">
+        <ExportButton bookmarks={bookmarks} />
+        <ImportButton
+          onImport={handleImport}
+          existingUrls={bookmarks.map((b) => b.url)}
+        />
+      </div>
     </div>
   );
 }
