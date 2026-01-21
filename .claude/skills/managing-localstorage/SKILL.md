@@ -1,5 +1,5 @@
 ---
-name: localstorage-crud
+name: managing-localstorage
 description: Handle localStorage CRUD operations in React apps. Use when building features that persist data to browser storage, manage client-side state, or need offline-capable storage.
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: code-review
+name: reviewing-code
 description: Review code changes in the bookmark vault project
 parameters:
   type: object

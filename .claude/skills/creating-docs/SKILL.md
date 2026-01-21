@@ -1,5 +1,5 @@
 ---
-name: create-docs
+name: creating-docs
 description: Create documentation or guidance files for the repository
 parameters:
   type: object
