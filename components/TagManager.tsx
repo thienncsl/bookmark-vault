@@ -63,6 +63,7 @@ export function TagManager({
       </div>
       <input
         type="text"
+        id="tags"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}

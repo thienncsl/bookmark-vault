@@ -113,7 +113,9 @@ describe("AddBookmarkForm (Edit Mode)", () => {
       expect(screen.getByLabelText(/title/i)).toHaveValue("Edit Test");
       expect(screen.getByLabelText(/url/i)).toHaveValue("https://edit-test.com");
       expect(screen.getByLabelText(/description/i)).toHaveValue("Edit description");
-      expect(screen.getByLabelText(/tags/i)).toHaveValue("edit, test");
+      // Tags are displayed as chips, not in the input
+      expect(screen.getByText("edit")).toBeInTheDocument();
+      expect(screen.getByText("test")).toBeInTheDocument();
     });
   });
 
