@@ -1,0 +1,45 @@
+{
+  "bookmark_count": 6,
+  "issues_found": 6,
+  "issue_breakdown": {
+    "empty_descriptions": 2,
+    "missing_tags": 2,
+    "duplicates": 1,
+    "invalid_urls": 1
+  },
+  "details": {
+    "duplicate_urls": [
+      {
+        "url": "https://github.com",
+        "count": 2
+      }
+    ],
+    "bookmarks_with_empty_description": [
+      {
+        "id": "3",
+        "title": "Duplicate Test"
+      },
+      {
+        "id": "5",
+        "title": "No Description"
+      }
+    ],
+    "bookmarks_with_missing_tags": [
+      {
+        "id": "3",
+        "title": "Duplicate Test"
+      },
+      {
+        "id": "6",
+        "title": "No Tags"
+      }
+    ],
+    "bookmarks_with_invalid_url": [
+      {
+        "id": "4",
+        "title": "Invalid URL",
+        "url": "not-a-valid-url"
+      }
+    ]
+  }
+}

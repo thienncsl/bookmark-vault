@@ -1,0 +1,32 @@
+name: bookmark-maintenance
+description: Automated bookmark maintenance workflow for Bookmark Vault
+trigger: manual
+
+steps:
+-id: analyze
+name: Analyze Bookmarks
+prompt: steps/01-analyze.md
+outputs:
+- bookmark_count
+- issues_found
+
+-id: validate
+name: Validate Data Quality
+prompt: steps/02-validate.md
+depends_on:[analyze]
+condition:"{{ issues_found > 0 }}"
+outputs:
+- validation_results
+
+-id: cleanup
+name: Suggest Cleanup Actions
+prompt: steps/03-cleanup.md
+depends_on:[validate]
+outputs:
+- cleanup_suggestions
+
+-id: report
+name: Generate Report
+prompt: steps/04-report.md
+depends_on:[analyze, validate, cleanup]
+template: templates/report-template.md
