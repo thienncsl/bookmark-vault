@@ -1,8 +1,10 @@
 import {
   getBookmarks,
   addBookmark,
+  updateBookmark,
   deleteBookmark,
   searchBookmarks,
+  STORAGE_KEY,
 } from "../storage";
 
 describe("storage", () => {
@@ -160,6 +162,74 @@ describe("storage", () => {
         "bookmark-vault-data",
         JSON.stringify(bookmarks)
       );
+    });
+  });
+
+  describe("updateBookmark", () => {
+    it("updates existing bookmark with new values", () => {
+      const bookmarks = [
+        {
+          id: "1",
+          title: "Original",
+          url: "https://original.com",
+          description: "Original desc",
+          tags: ["old"],
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+      ];
+      (localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(bookmarks));
+
+      updateBookmark("1", { title: "Updated", url: "https://updated.com" });
+
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        STORAGE_KEY,
+        expect.stringContaining("Updated")
+      );
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        STORAGE_KEY,
+        expect.stringContaining("updatedAt")
+      );
+    });
+
+    it("updates tags array", () => {
+      const bookmarks = [
+        {
+          id: "1",
+          title: "Test",
+          url: "https://test.com",
+          tags: ["old"],
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+      ];
+      (localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(bookmarks));
+
+      updateBookmark("1", { tags: ["new", "tags"] });
+
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        STORAGE_KEY,
+        expect.stringContaining("new")
+      );
+      expect(localStorage.setItem).toHaveBeenCalledWith(
+        STORAGE_KEY,
+        expect.not.stringContaining("old")
+      );
+    });
+
+    it("does nothing when bookmark not found", () => {
+      const bookmarks = [
+        {
+          id: "existing",
+          title: "Existing",
+          url: "https://existing.com",
+          tags: [],
+          createdAt: "2024-01-01T00:00:00.000Z",
+        },
+      ];
+      (localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify(bookmarks));
+
+      updateBookmark("non-existent", { title: "Test" });
+
+      expect(localStorage.setItem).not.toHaveBeenCalled();
     });
   });
 

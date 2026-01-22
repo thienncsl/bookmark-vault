@@ -14,6 +14,7 @@ export const bookmarkSchema = z.object({
   description: z.string().optional(),
   tags: z.array(z.string()),
   createdAt: z.string(),
+  updatedAt: z.string().optional(),
 });
 
 export type BookmarkInput = z.infer<typeof bookmarkInputSchema>;

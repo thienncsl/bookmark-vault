@@ -1,3 +1,9 @@
+## Storage Patterns for Bookmark Vault
+
+### Storage Abstraction Pattern
+
+```tsx
+// lib/storage.ts
 import { v4 as uuidv4 } from "uuid";
 import { type Bookmark, type CreateBookmarkInput, type UpdateBookmarkInput } from "./types";
 import { bookmarkSchema } from "./validation";
@@ -5,6 +11,11 @@ import { bookmarkSchema } from "./validation";
 const STORAGE_KEY = "bookmark-vault-data";
 
 export { STORAGE_KEY };
+
+// 1. Always check for SSR (typeof window !== "undefined")
+// 2. Wrap all operations in try/catch
+// 3. Validate with Zod on read
+// 4. Return empty array on error, don't throw
 
 export function getBookmarks(): Bookmark[] {
   if (typeof window === "undefined") return [];
@@ -31,7 +42,7 @@ export function addBookmark(input: CreateBookmarkInput): Bookmark {
 
   try {
     const bookmarks = getBookmarks();
-    bookmarks.unshift(bookmark);
+    bookmarks.unshift(bookmark); // Add to beginning
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
   } catch {
     console.error("Failed to save bookmark to localStorage");
@@ -45,7 +56,7 @@ export function deleteBookmark(id: string): void {
 
   try {
     const bookmarks = getBookmarks();
-    const filtered = bookmarks.filter(b => b.id !== id);
+    const filtered = bookmarks.filter((b) => b.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   } catch {
     console.error("Failed to delete bookmark from localStorage");
@@ -57,7 +68,7 @@ export function updateBookmark(id: string, input: UpdateBookmarkInput): void {
 
   try {
     const bookmarks = getBookmarks();
-    const index = bookmarks.findIndex(b => b.id === id);
+    const index = bookmarks.findIndex((b) => b.id === id);
     if (index === -1) return;
 
     bookmarks[index] = {
@@ -86,3 +97,63 @@ export function searchBookmarks(query: string, bookmarks?: Bookmark[]): Bookmark
       b.tags.some((t) => t.toLowerCase().includes(lowerQuery))
   );
 }
+```
+
+### Type Definitions Pattern
+
+```tsx
+// lib/types.ts
+export interface Bookmark {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type CreateBookmarkInput = Omit<Bookmark, "id" | "createdAt" | "updatedAt">;
+export type UpdateBookmarkInput = Partial<Omit<Bookmark, "id" | "createdAt">>;
+```
+
+### Zod Validation Pattern
+
+```tsx
+// lib/validation.ts
+import { z } from "zod";
+
+export const bookmarkInputSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  url: z.string().url("Must be a valid URL"),
+  description: z.string().optional(),
+  tags: z.array(z.string()).default([]),
+});
+
+export const bookmarkSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  url: z.string().url(),
+  description: z.string().optional(),
+  tags: z.array(z.string()),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+});
+
+export type BookmarkInput = z.infer<typeof bookmarkInputSchema>;
+```
+
+### Error Handling Pattern
+
+```tsx
+// Pattern for graceful degradation
+async function safeGetBookmarks(): Promise<Bookmark[]> {
+  try {
+    return getBookmarks();
+  } catch (error) {
+    // Log error, return empty array, UI shows fallback
+    console.error("Storage error:", error);
+    return [];
+  }
+}
+```

@@ -5,6 +5,7 @@ import { useBookmarksContext } from "@/hooks/useBookmarks";
 import { ExportButton } from "@/components/ExportButton";
 import { ImportButton } from "@/components/ImportButton";
 import { type Bookmark } from "@/lib/types";
+import { STORAGE_KEY } from "@/lib/storage";
 
 interface BookmarkToolbarProps {
   showAddForm: boolean;
@@ -24,14 +25,13 @@ export function BookmarkToolbar({
       if (typeof window === "undefined") return;
 
       try {
-        const storageKey = "bookmark-vault-data";
         if (mode === "replace") {
-          localStorage.setItem(storageKey, JSON.stringify(importedBookmarks));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(importedBookmarks));
         } else {
           // Merge bookmarks - append to existing
           let existing: Bookmark[] = [];
           try {
-            const existingData = localStorage.getItem(storageKey);
+            const existingData = localStorage.getItem(STORAGE_KEY);
             if (existingData) {
               existing = JSON.parse(existingData);
             }
@@ -40,7 +40,7 @@ export function BookmarkToolbar({
             existing = [];
           }
           const combined = [...existing, ...importedBookmarks];
-          localStorage.setItem(storageKey, JSON.stringify(combined));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
         }
       } catch {
         console.error("Failed to save imported bookmarks to localStorage");

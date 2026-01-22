@@ -5,12 +5,13 @@ import { useBookmarksContext } from "@/hooks/useBookmarks";
 import { bookmarkInputSchema } from "@/lib/validation";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { type Bookmark, type CreateBookmarkInput, type UpdateBookmarkInput } from "@/lib/types";
+import { TagManager } from "@/components/TagManager";
 
 interface FormData {
   title: string;
   url: string;
   description: string;
-  tags: string;
+  tags: string[];
 }
 
 interface FormErrors {
@@ -42,7 +43,7 @@ export function AddBookmarkForm({
     title: "",
     url: "",
     description: "",
-    tags: "",
+    tags: [],
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,13 +56,13 @@ export function AddBookmarkForm({
         title: bookmark.title,
         url: bookmark.url,
         description: bookmark.description || "",
-        tags: bookmark.tags.join(", "),
+        tags: bookmark.tags,
       });
     }
   }, [bookmark]);
 
   const clearForm = useCallback(() => {
-    setFormData({ title: "", url: "", description: "", tags: "" });
+    setFormData({ title: "", url: "", description: "", tags: [] });
     setErrors({});
   }, []);
 
@@ -102,15 +103,7 @@ export function AddBookmarkForm({
     setIsSubmitting(true);
     setErrors({});
 
-    const tagsArray = formData.tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    const result = bookmarkInputSchema.safeParse({
-      ...formData,
-      tags: tagsArray,
-    });
+    const result = bookmarkInputSchema.safeParse(formData);
 
     if (!result.success) {
       const fieldErrors: FormErrors = {};
@@ -143,7 +136,7 @@ export function AddBookmarkForm({
         title: formData.title,
         url: formData.url,
         description: formData.description || undefined,
-        tags: tagsArray,
+        tags: formData.tags,
       };
 
       await updateBookmark(bookmark.id, updateInput);
@@ -157,11 +150,11 @@ export function AddBookmarkForm({
         title: formData.title,
         url: formData.url,
         description: formData.description || undefined,
-        tags: tagsArray,
+        tags: formData.tags,
       };
 
       await addBookmark(createInput);
-      setFormData({ title: "", url: "", description: "", tags: "" });
+      setFormData({ title: "", url: "", description: "", tags: [] });
       setIsSubmitting(false);
       setSuccess(true);
       onBookmarkAdded?.();
@@ -247,14 +240,10 @@ export function AddBookmarkForm({
         >
           Tags
         </label>
-        <input
-          type="text"
-          id="tags"
-          name="tags"
-          value={formData.tags}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 shadow-sm focus:border-blue-500 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-500 sm:text-sm transition-colors"
-          placeholder="tag1, tag2, tag3"
+        <TagManager
+          tags={formData.tags}
+          onTagsChange={(tags) => setFormData((prev) => ({ ...prev, tags }))}
+          disabled={isSubmitting}
         />
         {errors.tags && (
           <p className="mt-1 text-sm text-red-600 dark:text-red-400">
