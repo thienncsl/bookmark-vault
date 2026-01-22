@@ -21,16 +21,29 @@ export function BookmarkToolbar({
 
   const handleImport = useCallback(
     (importedBookmarks: Bookmark[], mode: "merge" | "replace") => {
-      if (mode === "replace") {
-        // Replace all bookmarks
+      if (typeof window === "undefined") return;
+
+      try {
         const storageKey = "bookmark-vault-data";
-        localStorage.setItem(storageKey, JSON.stringify(importedBookmarks));
-      } else {
-        // Merge bookmarks - append to existing
-        const storageKey = "bookmark-vault-data";
-        const existing = JSON.parse(localStorage.getItem(storageKey) || "[]");
-        const combined = [...existing, ...importedBookmarks];
-        localStorage.setItem(storageKey, JSON.stringify(combined));
+        if (mode === "replace") {
+          localStorage.setItem(storageKey, JSON.stringify(importedBookmarks));
+        } else {
+          // Merge bookmarks - append to existing
+          let existing: Bookmark[] = [];
+          try {
+            const existingData = localStorage.getItem(storageKey);
+            if (existingData) {
+              existing = JSON.parse(existingData);
+            }
+          } catch {
+            console.error("Failed to parse existing bookmarks");
+            existing = [];
+          }
+          const combined = [...existing, ...importedBookmarks];
+          localStorage.setItem(storageKey, JSON.stringify(combined));
+        }
+      } catch {
+        console.error("Failed to save imported bookmarks to localStorage");
       }
 
       refreshBookmarks();

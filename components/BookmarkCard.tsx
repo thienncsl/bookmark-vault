@@ -34,7 +34,7 @@ export const BookmarkCard = memo(function BookmarkCard({
         `[BookmarkCard] "${bookmark.title}" - Render #${renderCounter.current}`
       );
     }
-  });
+  }, [bookmark.title]);
 
   // Memoize derived state to avoid recalculation on each render
   const isPending = useMemo(

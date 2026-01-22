@@ -29,7 +29,7 @@ export function BookmarkList() {
       renderCounter.current++;
       console.log(`[BookmarkList] Render #${renderCounter.current}`);
     }
-  });
+  }, []);
 
   const blurActiveElement = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {

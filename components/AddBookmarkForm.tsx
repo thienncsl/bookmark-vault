@@ -97,7 +97,7 @@ export function AddBookmarkForm({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrors({});
@@ -146,7 +146,7 @@ export function AddBookmarkForm({
         tags: tagsArray,
       };
 
-      updateBookmark(bookmark.id, updateInput);
+      await updateBookmark(bookmark.id, updateInput);
       setSuccess(true);
       setIsSubmitting(false);
       onBookmarkUpdated?.();
@@ -160,7 +160,7 @@ export function AddBookmarkForm({
         tags: tagsArray,
       };
 
-      addBookmark(createInput);
+      await addBookmark(createInput);
       setFormData({ title: "", url: "", description: "", tags: "" });
       setIsSubmitting(false);
       setSuccess(true);
