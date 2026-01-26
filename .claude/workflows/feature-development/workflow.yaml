@@ -1,0 +1,55 @@
+name: feature-development
+description: Standard workflow for implementing new features
+trigger: manual
+
+steps:
+- id: plan
+  name: Plan Feature Implementation
+  prompt: steps/01-plan.md
+  outputs:
+  - feature_description
+  - implementation_steps
+  - files_affected
+
+- id: scaffold
+  name: Scaffold Feature Code
+  prompt: steps/02-scaffold.md
+  depends_on: [plan]
+  outputs:
+  - scaffolded_files
+  - feature_description
+  - files_affected
+
+- id: implement
+  name: Implement Feature
+  prompt: steps/03-implement.md
+  depends_on: [scaffold]
+  outputs:
+  - implementation_complete
+  - feature_description
+  - files_affected
+
+- id: test
+  name: Write and Run Tests
+  prompt: steps/04-test.md
+  depends_on: [implement]
+  outputs:
+  - tests_pass
+  - feature_description
+  - files_affected
+
+- id: verify
+  name: Verify All Checks Pass
+  prompt: steps/05-verify.md
+  depends_on: [test]
+  outputs:
+  - checks_pass
+  - feature_description
+  - implementation_steps
+  - files_affected
+
+- id: review
+  name: Generate Implementation Summary
+  prompt: steps/06-review.md
+  depends_on: [verify]
+  template: templates/review-template.md

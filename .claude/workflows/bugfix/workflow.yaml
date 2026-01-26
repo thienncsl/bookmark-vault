@@ -1,0 +1,57 @@
+name: bugfix
+description: Workflow for investigating and fixing bugs
+trigger: manual
+
+steps:
+- id: investigate
+  name: Investigate Bug
+  prompt: steps/01-investigate.md
+  outputs:
+  - bug_description
+  - affected_components
+  - reproduction_steps
+
+- id: identify
+  name: Identify Root Cause
+  prompt: steps/02-identify.md
+  depends_on: [investigate]
+  outputs:
+  - root_cause
+  - fix_approach
+  - bug_description
+  - affected_components
+
+- id: implement
+  name: Implement Fix
+  prompt: steps/03-implement.md
+  depends_on: [identify]
+  outputs:
+  - fix_complete
+  - root_cause
+  - fix_approach
+  - bug_description
+
+- id: test
+  name: Verify Fix and Add Tests
+  prompt: steps/04-test.md
+  depends_on: [implement]
+  outputs:
+  - tests_pass
+  - bug_description
+  - root_cause
+
+- id: verify
+  name: Run Full Verification
+  prompt: steps/05-verify.md
+  depends_on: [test]
+  outputs:
+  - checks_pass
+  - bug_description
+  - root_cause
+  - fix_approach
+
+- id: document
+  name: Document the Fix
+  prompt: steps/06-document.md
+  depends_on: [verify]
+  template: templates/fix-summary.md
